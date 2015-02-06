@@ -50,6 +50,9 @@
 #warning This warning can be ignored if you are working on a standalone iotlab-m3 board.
 #endif
 
+/* CFS defines */
+#define XMEM_ERASE_UNIT_SIZE (64*1024L)
+
 /* Openlab common definitions */
 
 #include "../openlab/contiki-openlab-conf.h"
