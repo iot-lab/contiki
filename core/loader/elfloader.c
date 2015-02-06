@@ -179,7 +179,7 @@ find_local_symbol(int fd, const char *symbol,
 {
   struct elf32_sym s;
   unsigned int a;
-  char name[30];
+  char name[60];
   struct relevant_section *sect;
   
   for(a = symtab; a < symtab + symtabsize; a += sizeof(s)) {
@@ -188,18 +188,18 @@ find_local_symbol(int fd, const char *symbol,
     if(s.st_name != 0) {
       seek_read(fd, strtab + s.st_name, name, sizeof(name));
       if(strcmp(name, symbol) == 0) {
-	if(s.st_shndx == bss.number) {
-	  sect = &bss;
-	} else if(s.st_shndx == data.number) {
-	  sect = &data;
-  } else if(s.st_shndx == rodata.number) {
-    sect = &rodata;
-	} else if(s.st_shndx == text.number) {
-	  sect = &text;
-	} else {
-	  return NULL;
-	}
-	return &(sect->address[s.st_value]);
+		if(s.st_shndx == bss.number) {
+			sect = &bss;
+		} else if(s.st_shndx == data.number) {
+	  		sect = &data;
+  		} else if(s.st_shndx == rodata.number) {
+    		sect = &rodata;
+		} else if(s.st_shndx == text.number) {
+	  		sect = &text;
+		} else {
+	  		return NULL;
+		}
+		return &(sect->address[s.st_value]);
       }
     }
   }
@@ -221,7 +221,7 @@ relocate_section(int fd,
   int rel_size = 0;
   struct elf32_sym s;
   unsigned int a;
-  char name[30];
+  char name[60];
   char *addr;
   struct relevant_section *sect;
 
@@ -276,7 +276,6 @@ relocate_section(int fd,
       } else {
 	return ELFLOADER_SEGMENT_NOT_FOUND;
       }
-      
       addr = sect->address;
     }
 
