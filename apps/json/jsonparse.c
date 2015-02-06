@@ -128,6 +128,9 @@ jsonparse_next(struct jsonparse_state *state)
 /*       printf("Popping vtype: '%c'\n", state->vtype); */
       pop(state);
       s = jsonparse_get_type(state);
+    } else if(s == ':' && state->vtype == 0) {
+    	pop(state);
+    	s = jsonparse_get_type(state);
     }
     if(s == '{') {
       pop(state);
@@ -153,6 +156,8 @@ jsonparse_next(struct jsonparse_state *state)
       pop(state);
     } else if(s == '[') {
       /* ok! */
+    } else if(s == ':' && state->vtype == 0) {
+    	pop(state);
     } else {
       state->error = JSON_ERROR_SYNTAX;
       return JSON_TYPE_ERROR;
