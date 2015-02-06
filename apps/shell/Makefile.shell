@@ -52,3 +52,7 @@ endif
 ifeq ($(TARGET),z1)
   shell_src += shell-sky.c shell-exec.c
 endif
+
+ifeq ($(TARGET),iotlab-m3)
+  shell_src += shell-exec.c
+endif
