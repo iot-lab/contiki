@@ -39,7 +39,10 @@ $(error Could not find openlab repository)
 	endif
 endif
 
-
+#ifdef ELF_LOADER
+ELFLOADER  = symtab.c elfloader.c elfloader-arch.c
+DEFINES=ELFLOADER_DATAMEMORY_SIZE=0x800,ELFLOADER_TEXTMEMORY_SIZE=0x800
+#endif
 
 DEBUG            = 1
 CFLAGS          += -DIOTLAB_M3 -DKEEP_UART=1 -DENABLE_DEBUG=1
@@ -47,6 +50,8 @@ LINKERSCRIPT     = $(OPENLAB_GIT)/platform/scripts/stm32f103rey6.ld
 
 OOCD_TARGET      = stm32f1x
 OOCD_ITF         = $(OPENLAB_GIT)/platform/scripts/iotlab-m3.cfg
+
+CLEAN += symbols.c symbols.h
 
 include $(OPENLAB)/Makefile.include
 
@@ -59,7 +64,8 @@ OPENLAB_INCLUDE_PATH += \
 	-I$(OPENLAB_GIT)	                \
 	-I$(OPENLAB_GIT)/drivers/cortex-m3	\
 	-I$(OPENLAB_GIT)/drivers/stm32		\
-	-I$(OPENLAB_GIT)/drivers/stm32f1xx
+	-I$(OPENLAB_GIT)/drivers/stm32f1xx	\
+	-I$(OPENLAB_GIT)/drivers
 
 OPENLAB_TARGET_DIRS  += . 			\
 	$(OPENLAB_REL)				\
@@ -146,6 +152,13 @@ CONTIKI_SRC += 					\
 	leds.c 					\
 	sensors.c				\
 	slip.c					\
+	xmem.c					\
+	cfs-coffee.c			\
+	elfloader.c				\
+	elfloader-arch.c		
+
+#	symtab.c				\
+
 
 ##
 ## Full source setup
@@ -156,8 +169,9 @@ CONTIKI_TARGET_DIRS += $(OPENLAB_TARGET_DIRS)
 CONTIKI_TARGET_SOURCEFILES +=  			\
 	$(OPENLAB_SRC)		 		\
 	$(OPENLAB_CONTIKI_WRAPPERS)		\
+	$(ELFLOADER)				\
 	$(CONTIKI_SRC)                          \
-	$(CONTIKI_TARGET_MAIN)
+	$(CONTIKI_TARGET_MAIN)					
 
 CONTIKI_SOURCEFILES += $(CONTIKI_TARGET_SOURCEFILES)
 
@@ -175,11 +189,35 @@ do					\
 done
 endef
 
+ifdef CORE
+.PHONY: symbols.c symbols.h
+symbols.c:
+	$(NM) $(CORE) | awk -f $(CONTIKI)/tools/mknmlist > symbols.c
+else
+symbols.c symbols.h:
+	cp ${CONTIKI}/tools/empty-symbols.c symbols.c
+	cp ${CONTIKI}/tools/empty-symbols.h symbols.h
+endif
+
 CUSTOM_RULE_C_TO_OBJECTDIR_O = "defined"
 $(OBJECTDIR)/%.o: %.c
 	@$(OPENLAB_OBJECTDIR)
+	@echo $(OPENLAB_INCLUDE_PATH)
 	$(CC) $(CFLAGS) $(OPENLAB_INCLUDE_PATH) -MMD -c $< -o $@
 	@$(FINALIZE_DEPENDENCY)
+
+OTHER_CFLAGS := $(filter-out -ffunction-sections,$(CFLAGS))
+
+CUSTOM_RULE_C_TO_CE = defined
+%.ce: %.c
+	@echo $(CFLAGS)
+	@echo $(filter-out -ffunction-sections,$(filter-out -fdata-sections,$(CFLAGS)))
+	$(TRACE_CC)
+#-mlong-calls
+	$(Q)$(CC) $(CFLAGS) -DAUTOSTART_ENABLE -c $< -o $@
+	arm-none-eabi-ld -r -T $(OPENLAB_GIT)/platform/scripts/merge-segments.ld -o $@.xxx $@
+	$(STRIP) --strip-unneeded -g -x $@
+	$(STRIP) --strip-unneeded -g -x $@.xxx
 
 ##
 ##

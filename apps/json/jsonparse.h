@@ -38,7 +38,7 @@
 #ifdef JSONPARSE_CONF_MAX_DEPTH
 #define JSONPARSE_MAX_DEPTH JSONPARSE_CONF_MAX_DEPTH
 #else
-#define JSONPARSE_MAX_DEPTH 10
+#define JSONPARSE_MAX_DEPTH 100
 #endif
 
 struct jsonparse_state {

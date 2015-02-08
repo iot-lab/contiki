@@ -88,6 +88,8 @@ TCL_PORT    = 5${OOCD_PORT}
 
 OOCD      = openocd
 
+contiki-$(TARGET).a: ${addprefix $(OBJECTDIR)/,symbols.o}
+
 %.od: %.$(TARGET)
 	$(OBJDUMP) -S $< > $@
 

@@ -18,10 +18,6 @@
 *.avr-raven
 *.exp5438
 *.mbxxx
-*.iotlab-m3
-*.iotlab-a8-m3
-*.openlab-fox
-*.openlab-newt
 *.win32
 *.apple2enh
 *.atarixl
@@ -37,7 +33,6 @@ summary
 *~
 .DS_Store
 obj_*
-symbols.*
 Makefile.target
 doc/html
 patches-*
@@ -56,9 +51,6 @@ tools/cooja/apps/serial_socket/lib/
 tools/coffee-manager/coffee.jar
 tools/cooja/apps/avrora/lib/cooja_avrora.jar
 tools/cooja/apps/collect-view/cooja-collect-view.jar
-*swp
-
-*.o
 
 # sdcc build artifacts
 contiki-sensinode.lib
