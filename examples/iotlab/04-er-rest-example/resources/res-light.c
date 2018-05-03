@@ -58,24 +58,24 @@ RESOURCE(res_light,
 static void
 res_get_handler(void *request, void *response, uint8_t *buffer, uint16_t preferred_size, int32_t *offset)
 {
-  uint16_t light = light_sensor.value(0) / LIGHT_SENSOR_VALUE_SCALE;
+  float light = ((float)light_sensor.value(0)) / LIGHT_SENSOR_VALUE_SCALE;
 
   unsigned int accept = -1;
   REST.get_header_accept(request, &accept);
 
   if(accept == -1 || accept == REST.type.TEXT_PLAIN) {
     REST.set_header_content_type(response, REST.type.TEXT_PLAIN);
-    snprintf((char *)buffer, REST_MAX_CHUNK_SIZE, "%u", light);
+    snprintf((char *)buffer, REST_MAX_CHUNK_SIZE, "%f", light);
 
     REST.set_response_payload(response, (uint8_t *)buffer, strlen((char *)buffer));
   } else if(accept == REST.type.APPLICATION_XML) {
     REST.set_header_content_type(response, REST.type.APPLICATION_XML);
-    snprintf((char *)buffer, REST_MAX_CHUNK_SIZE, "<light value=\"%u\"/>", light);
+    snprintf((char *)buffer, REST_MAX_CHUNK_SIZE, "<light value=\"%f\"/>", light);
 
     REST.set_response_payload(response, buffer, strlen((char *)buffer));
   } else if(accept == REST.type.APPLICATION_JSON) {
     REST.set_header_content_type(response, REST.type.APPLICATION_JSON);
-    snprintf((char *)buffer, REST_MAX_CHUNK_SIZE, "{'light':%u}", light);
+    snprintf((char *)buffer, REST_MAX_CHUNK_SIZE, "{'light':%f}", light);
 
     REST.set_response_payload(response, buffer, strlen((char *)buffer));
   } else {
